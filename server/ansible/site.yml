@@ -1,0 +1,6 @@
+- name: netserver setup
+  hosts: netserver
+  roles:
+    - netserver
+    - dnsmasq
+    - matchbox

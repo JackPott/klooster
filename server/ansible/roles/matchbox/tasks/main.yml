@@ -1,0 +1,43 @@
+
+
+- name: Copy custom matchbox package to server
+  ansible.builtin.copy:
+    src: matchbox.tcz
+    dest: /tmp
+    owner: tc
+    group: staff
+    mode: '0755'
+  become: true
+
+- name: Install matchbox package
+  shell:
+    cmd: tce-load -i /tmp/matchbox.tcz
+    creates: /usr/local/sbin/matchbox
+
+
+- name: Start matchbox on boot
+  ansible.builtin.lineinfile:
+    line: /usr/local/sbin/start_matchbox
+    regex: '^/usr/local/sbin/start_matchbox'
+    path: /opt/bootlocal.sh
+  become: true
+
+- name: Kill matchbox if its running
+  shell:
+    cmd: killall matchbox
+  become: true
+  ignore_errors: yes
+
+# - name: Tmp copy daemon script (stick this in the package)
+#   ansible.builtin.copy:
+#     src: start_matchbox.sh
+#     dest: /tmp
+#     owner: tc
+#     group: staff
+#     mode: '0777'
+#   become: true
+
+- name: Start matchbox
+  shell:
+    cmd: /usr/local/sbin/start_matchbox
+  become: true

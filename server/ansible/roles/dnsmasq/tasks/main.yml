@@ -1,0 +1,30 @@
+---
+- name: Install dnsmasq package
+  shell:
+    cmd: tce-load -wi dnsmasq
+    creates: /usr/local/sbin/dnsmasq
+
+- name: Create dnsmasq config file
+  ansible.builtin.template:
+    src: templates/dnsmasq.conf
+    dest: /usr/local/etc/dnsmasq.conf
+  become: true
+
+- name: Start dnsmasq on boot
+  ansible.builtin.lineinfile:
+    line: /usr/local/sbin/dnsmasq
+    regex: '^/usr/local/sbin/dnsmasq'
+    path: /opt/bootlocal.sh
+  become: true
+
+- name: Kill dnsmasq if its running
+  shell:
+    cmd: killall dnsmasq
+  become: true
+  ignore_errors: yes
+
+- name: Start dnsmasq
+  shell:
+    cmd: /usr/local/sbin/dnsmasq
+  become: true
+

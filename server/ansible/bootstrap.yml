@@ -1,0 +1,6 @@
+- name: bootstrap SSH setup
+  hosts: '{{ hosts }}'
+  remote_user: '{{ user }}'
+  become: yes
+  roles:
+    - common-tc

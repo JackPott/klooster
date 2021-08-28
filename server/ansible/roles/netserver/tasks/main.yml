@@ -1,0 +1,4 @@
+---
+- name: Prints root directory
+  shell:
+    cmd: ls /

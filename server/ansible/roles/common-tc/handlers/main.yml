@@ -1,0 +1,5 @@
+---
+
+- name: restart sshd
+  shell:
+    cmd: /usr/local/etc/init.d/openssh restart

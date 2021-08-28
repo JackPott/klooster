@@ -1,0 +1,44 @@
+---
+- name: Add a new user named ansible
+  shell:
+    cmd: touch /opt/users/ansible && adduser -D ansible
+    creates: /opt/users/ansible
+
+- name: Sets ansible user password
+  shell:
+    cmd: echo "ansible:{{ lookup('password', '/opt/users/ansiblepwd chars=ascii_letters') }}" | chpasswd
+    creates: /opt/users/ansiblepwd
+
+- name: Add ansible user to the sudoers
+  ansible.builtin.lineinfile:
+    path: "/etc/sudoers"
+    state: present
+    regex: '^ansible'
+    line: "ansible	ALL=(ALL) NOPASSWD: ALL"
+
+- name: Deploy SSH Key
+  authorized_key:
+    user: ansible
+    key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+    path: /home/ansible/.ssh/authorized_keys
+    state: present
+
+- name: Disable Password Authentication
+  lineinfile:
+    path: "{{ sshd_config_path | default('/etc/ssh/sshd_config') }}"
+    regexp: '^PasswordAuthentication'
+    line: "PasswordAuthentication no"
+    state: present
+    backup: yes
+
+- name: Disable Root Login
+  lineinfile:
+    path: "{{ sshd_config_path | default('/etc/ssh/sshd_config') }}"
+    regexp: '^PermitRootLogin'
+    line: "PermitRootLogin no"
+    state: present
+    backup: yes
+  notify:
+       - restart sshd
+
+# Add command to make changes permanent, filetool.sh -b etc
